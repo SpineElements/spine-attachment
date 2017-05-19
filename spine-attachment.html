@@ -1,0 +1,170 @@
+<!--
+  ~ Copyright (c) 2000-2017 TeamDev Ltd. All rights reserved.
+  ~ TeamDev PROPRIETARY and CONFIDENTIAL.
+  ~ Use is subject to license terms.
+  -->
+
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+
+<dom-module id="spine-attachment">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+        position: relative;
+        vertical-align: top;
+        width: 132px;
+        height: 88px;
+        background-size: cover;
+        background: #eee no-repeat 50% 50%;
+        margin: 0 var(--indent-mini) var(--indent-midi) 0;
+        @apply --shadow-elevation-2dp;
+      }
+
+      paper-icon-button {
+        position: absolute;
+        right: -10px;
+        top: -10px;
+        padding: 2px 3px 3px;
+        height: 20px;
+        width: 20px;
+        background: white;
+        border-radius: 50%;
+        color: var(--light-theme-primary-color);
+        border: 1px solid var(--light-theme-divider-color);
+        display: none;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      a > div {
+        padding: 12px;
+      }
+
+      a:hover > paper-icon-button {
+        display: block;
+      }
+
+      .caption, .domain {
+        @apply --paper-font-body1;
+        color: black;
+      }
+
+      .caption {
+        display: block;
+        padding-bottom: var(--indent-main);
+      }
+
+      .domain {
+        margin: 0;
+        color: var(--light-theme-secondary-color);
+        display: flex;
+        align-items: center;
+      }
+
+      .domain > span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .image {
+        height: 100%;
+        width: 100%;
+      }
+
+      .favicon, iron-icon {
+        width: 16px;
+        height: 16px;
+        padding-right: var(--indent-mini);
+        flex: 0 0 auto;
+      }
+    </style>
+
+    <a href="[[url]]"
+       target='_blank'
+       rel="noopener noreferrer"
+    >
+      <paper-icon-button icon="close"></paper-icon-button>
+
+      <template is="dom-if" if="[[_isImage]]">
+        <img src="[[url]]" class="image"/>
+      </template>
+
+      <template is="dom-if" if="[[_isLink]]">
+        <div>
+          <strong class="caption">[[caption]]</strong>
+          <p class="domain">
+            <img src="[[_getLinkFavicon()]]" class="favicon"/>
+            <span>[[_extractDomain()]]</span>
+          </p>
+        </div>
+      </template>
+
+      <template is="dom-if" if="[[_isFile]]">
+        <div>
+          <strong class="caption">[[caption]]</strong>
+          <p class="domain">
+              <iron-icon icon="editor:insert-drive-file"></iron-icon>
+              <span>[[_extractDomain()]]</span>
+          </p>
+        </div>
+      </template>
+    </a>
+  </template>
+</dom-module>
+
+<script>
+  class SpineAttachment extends Polymer.Element {
+    static get is() {
+      return 'spine-attachment';
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      this._isImage = this.type === 'IMAGE';
+      this._isLink = this.type === 'LINK';
+      this._isFile = this.type === 'FILE';
+    }
+
+    static get properties() {
+      return {
+        url : {
+          type : String
+        },
+
+        caption : {
+          type : String
+        },
+
+        type : {
+          type : String
+        }
+      }
+    }
+
+    _getLinkFavicon() {
+      const domain = this._extractDomain();
+      return `https://${domain}/favicon.ico`;
+    }
+
+    _extractDomain() {
+      const url = this.url;
+      let domain;
+      if (url.indexOf("://") > -1) {
+        domain = url.split('/')[2];
+      } else {
+        domain = url.split('/')[0];
+      }
+      domain = domain.split(':')[0];
+
+      return domain;
+    };
+  }
+
+  customElements.define(SpineAttachment.is, SpineAttachment);
+</script>
